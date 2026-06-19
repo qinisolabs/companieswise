@@ -1,0 +1,51 @@
+{
+  "manifest_version": "0.3",
+  "name": "companieswise",
+  "display_name": "companieswise — UK company lookup",
+  "version": "0.2.0",
+  "description": "Verified UK company lookup & validation for AI agents — Companies House data, snapshot or live.",
+  "long_description": "Look up UK companies by their Companies House number, validate a number's format, or find a company number by name — from official Companies House data, never a guess. By default it uses a bundled sample (or a locally-cached monthly snapshot); add a free Companies House API key below to switch to real-time live data, including dissolved companies. Your key is sent only to the official Companies House API.",
+  "author": {
+    "name": "Qiniso",
+    "url": "https://github.com/qinisolabs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/qinisolabs/companieswise"
+  },
+  "homepage": "https://qinisolabs.github.io/companieswise",
+  "documentation": "https://qinisolabs.github.io/companieswise",
+  "support": "https://github.com/qinisolabs/companieswise/issues",
+  "license": "Apache-2.0",
+  "keywords": ["companies-house", "uk-company", "kyc", "due-diligence", "registry"],
+  "server": {
+    "type": "node",
+    "entry_point": "server/server.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/server.js"],
+      "env": {
+        "COMPANIESWISE_CH_API_KEY": "${user_config.ch_api_key}"
+      }
+    }
+  },
+  "tools": [
+    { "name": "lookup_company", "description": "Get a UK company's official registered details by its Companies House number." },
+    { "name": "validate_company_number", "description": "Check a UK company number's format and identify its register/type." },
+    { "name": "search_company", "description": "Find a UK company's number from its name (reverse lookup)." }
+  ],
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": { "node": ">=18.0.0" }
+  },
+  "user_config": {
+    "ch_api_key": {
+      "type": "string",
+      "title": "Companies House API key (optional)",
+      "description": "Add a free Companies House API key for real-time live data (incl. dissolved companies). Leave blank to use the bundled snapshot. Get one at developer.company-information.service.gov.uk.",
+      "sensitive": true,
+      "required": false
+    }
+  }
+}

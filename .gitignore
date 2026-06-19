@@ -7,3 +7,5 @@ dist/
 src/data.generated.ts
 data/companies.tsv
 data/companies.tsv.gz
+dist-mcpb/
+mcpb-build/

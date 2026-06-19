@@ -36,7 +36,8 @@
     "start": "node dist/server.js",
     "update": "node dist/update.js",
     "test": "npm run gen && tsx test/parity.test.ts",
-    "build-data": "node scripts/build-data.mjs"
+    "build-data": "node scripts/build-data.mjs",
+    "build-mcpb": "npm run build && node scripts/build-mcpb.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
