@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tgz
+.env
+.DS_Store
+.wrangler/
+src/data.generated.ts
+data/companies.tsv
+data/companies.tsv.gz

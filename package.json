@@ -1,0 +1,50 @@
+{
+  "name": "companieswise",
+  "version": "0.1.0",
+  "mcpName": "io.github.qinisolabs/companieswise",
+  "description": "Verified UK company lookup & number validation for AI agents — official Companies House data, not guesses.",
+  "license": "Apache-2.0",
+  "author": "Qiniso",
+  "homepage": "https://github.com/qinisolabs/companieswise#readme",
+  "repository": { "type": "git", "url": "git+https://github.com/qinisolabs/companieswise.git" },
+  "bugs": { "url": "https://github.com/qinisolabs/companieswise/issues" },
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "bin": {
+    "companieswise-mcp": "dist/server.js",
+    "companieswise-update": "dist/update.js"
+  },
+  "files": ["dist", "README.md", "LICENSE", "NOTICE"],
+  "engines": { "node": ">=18" },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "agents",
+    "llm",
+    "companies-house",
+    "uk-company",
+    "company-number",
+    "kyc",
+    "due-diligence",
+    "registry"
+  ],
+  "scripts": {
+    "gen": "node scripts/gen-data.mjs",
+    "build": "npm run gen && tsc",
+    "start": "node dist/server.js",
+    "update": "node dist/update.js",
+    "test": "npm run gen && tsx test/parity.test.ts",
+    "build-data": "node scripts/build-data.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "tsx": "^4.16.0",
+    "@types/node": "^20.14.0"
+  }
+}

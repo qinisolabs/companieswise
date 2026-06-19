@@ -1,0 +1,17 @@
+companieswise
+Copyright 2026 Qiniso
+
+This product uses data from Companies House.
+
+- UK company data is derived from the Companies House "Free Company Data Product",
+  published as open data under the Open Government Licence v3.0. Contains public sector
+  information licensed under the Open Government Licence v3.0.
+  See https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+- The real dataset (~5.6M companies) is built monthly from the official snapshot by CI and
+  distributed as a GitHub Release artifact (see README); the version bundled in this
+  repository is a small ILLUSTRATIVE sample and is not real Companies House data.
+
+companieswise reports the official Companies House register snapshot (UK-wide). It is a
+MONTHLY snapshot of the live register: company status is as of the dataset date, not
+real-time, and dissolved companies are generally absent. It is not legal, financial,
+KYC/AML, credit or other professional advice.

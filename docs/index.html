@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>companieswise — verified UK company lookup for AI agents</title>
+<meta name="description" content="companieswise gives AI agents official Companies House details for a UK company by number — name, status, type, incorporation date — from the official register snapshot, not guesses. UK-wide, monthly, with honest 'not found'. MCP server + TypeScript library by Qiniso." />
+<link rel="icon" href="logo.svg" type="image/svg+xml" />
+<style>
+  :root {
+    --emerald: #10b981; --emerald-dark: #047857; --ink: #0b1220; --muted: #5b6472;
+    --bg: #ffffff; --card: #f6f8f7; --line: #e3e8e5; --warn: #b45309;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: var(--ink); background: var(--bg); }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  header { padding: 72px 0 40px; text-align: center; }
+  .logo { width: 84px; height: 84px; }
+  h1 { font-size: 2.6rem; margin: 18px 0 6px; letter-spacing: -0.02em; }
+  .tag { font-size: 1.18rem; color: var(--emerald-dark); font-weight: 600; margin: 0 0 14px; }
+  .lede { font-size: 1.12rem; color: var(--muted); max-width: 650px; margin: 0 auto 26px; }
+  .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn { display: inline-block; padding: 11px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; }
+  .btn-primary { background: linear-gradient(135deg, var(--emerald), var(--emerald-dark)); color: #fff; }
+  .btn-ghost { border: 1px solid var(--line); color: var(--ink); }
+  section { padding: 36px 0; border-top: 1px solid var(--line); }
+  h2 { font-size: 1.5rem; letter-spacing: -0.01em; }
+  .warn { background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px 20px; margin: 18px 0; }
+  .warn b { color: var(--warn); }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  pre { background: var(--ink); color: #e6edf3; padding: 16px 18px; border-radius: 10px; overflow-x: auto; font-size: 0.9rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 16px; }
+  .mod { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .mod h3 { margin: 0 0 4px; font-size: 1.02rem; }
+  .mod p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  footer { color: var(--muted); font-size: 0.9rem; text-align: center; padding: 40px 0 64px; border-top: 1px solid var(--line); }
+  a { color: var(--emerald-dark); }
+  .note { color: var(--muted); font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img class="logo" src="logo.svg" alt="Qiniso" />
+    <h1>companieswise</h1>
+    <p class="tag">Verified UK company lookup &amp; number validation for AI agents.</p>
+    <p class="lede">Ask an LLM for a UK company's registered name and status by its number and it answers confidently — and usually wrongly. Those records live in the Companies House register, not a model's memory. companieswise looks them up in the official snapshot and returns the real details, or an honest "not found". <em>"Qiniso" means "truth" in Zulu.</em></p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#add">Add to Claude</a>
+      <a class="btn btn-ghost" href="https://github.com/qinisolabs/companieswise">GitHub</a>
+    </div>
+  </header>
+
+  <section>
+    <div class="warn">
+      <p style="margin:0"><b>Read this first.</b> The data is a <b>monthly snapshot of the live register</b> — company <b>status is as of the dataset date, not real-time</b>, and dissolved companies are generally absent. It's <b>UK-wide</b> (England &amp; Wales, Scotland, NI) and is <b>not legal, financial or KYC/AML advice.</b></p>
+    </div>
+    <h2>Why it exists</h2>
+    <p>Company registration data — the exact registered name, status, type, incorporation date and SIC of ~5.6M companies — is precisely the large, specific, changing reference data a language model cannot recall. Asked anyway, it pattern-matches a plausible answer and states it with full confidence. For onboarding, supplier checks, or due-diligence triage, a silently invented company record is a real problem. companieswise returns the official Companies House record by lookup, or an honest "not found".</p>
+  </section>
+
+  <section>
+    <h2>Tools</h2>
+    <div class="grid">
+      <div class="mod"><h3>lookup_company</h3><p>A company's official registered details by number — name, status, type, incorporation date, registered postcode, primary SIC. Honest "not found" if absent.</p></div>
+      <div class="mod"><h3>validate_company_number</h3><p>Is a UK company number well-formed, and what does its prefix denote (SC = Scotland, NI, OC = LLP…)? Format only — there's no check digit.</p></div>
+      <div class="mod"><h3>search_company</h3><p>Reverse lookup — find a company's number from its registered name.</p></div>
+    </div>
+  </section>
+
+  <section id="add">
+    <h2>Add it to Claude</h2>
+    <p>Runs locally over stdio — no key, no login. Add this under <code>mcpServers</code> and restart:</p>
+    <pre>{
+  "mcpServers": {
+    "companieswise": { "command": "npx", "args": ["-y", "companieswise"] }
+  }
+}</pre>
+    <p>Then load the real data once (the package ships with a small sample):</p>
+    <pre>npx companieswise-update</pre>
+    <p class="note">This caches the latest monthly Companies House snapshot locally — no API key, no rate limit, no per-request cost. A GitHub Action rebuilds the snapshot monthly, so re-running <code>companieswise-update</code> always fetches the current month. A hosted, always-current endpoint (Cloudflare D1 + the Companies House Streaming API) is a planned follow-on.</p>
+  </section>
+
+  <section>
+    <h2>What it is <em>not</em></h2>
+    <p class="note">companieswise reports the official Companies House register snapshot (UK-wide). It is a <strong>monthly snapshot of the live register</strong> — status is as of the dataset date, not real-time, and dissolved companies are generally absent (absent ≠ "never existed"). It is <strong>not</strong> legal, financial, credit or KYC/AML advice, and not a statutory due-diligence check. Unknown numbers return an honest "not found" — never a fabricated company.</p>
+  </section>
+
+</div>
+
+<footer>
+  companieswise — verified, trustworthy data tools for AI agents.<br />
+  Contains public sector information from Companies House licensed under the Open Government Licence v3.0.<br />
+  Open source · <a href="https://github.com/qinisolabs/companieswise">github.com/qinisolabs/companieswise</a> ·
+  <a href="https://www.npmjs.com/package/companieswise">npm</a> ·
+  <a href="https://github.com/qinisolabs">Qiniso</a>
+</footer>
+</body>
+</html>

@@ -1,0 +1,67 @@
+name: Refresh Companies House data
+
+# Builds the monthly snapshot artifact and publishes it to the "data" GitHub Release,
+# which `companieswise-update` downloads. Needs NO secrets beyond the automatic
+# GITHUB_TOKEN — the data is NOT bundled into npm, so no npm publish happens here.
+#
+# Companies House publishes BasicCompanyDataAsOneFile-YYYY-MM-01.zip within 5 working
+# days of month-end, so this runs on the 10th. Use "Run workflow" to backfill a month.
+
+on:
+  schedule:
+    - cron: "0 6 10 * *"
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Snapshot month YYYY-MM (default: current month)"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+
+      - name: Resolve snapshot month + URL
+        id: src
+        run: |
+          MONTH="${{ github.event.inputs.month }}"
+          if [ -z "$MONTH" ]; then MONTH=$(date -u +%Y-%m); fi
+          echo "version=${MONTH}-01" >> "$GITHUB_OUTPUT"
+          echo "url=https://download.companieshouse.gov.uk/BasicCompanyDataAsOneFile-${MONTH}-01.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Download + unzip the Companies House snapshot
+        run: |
+          echo "Downloading ${{ steps.src.outputs.url }}"
+          curl -fSL --retry 3 "${{ steps.src.outputs.url }}" -o ch.zip
+          unzip -o ch.zip
+          ls -la BasicCompanyData*.csv
+
+      - name: Build the compact artifact
+        run: |
+          CSV=$(ls BasicCompanyData*.csv | head -1)
+          node scripts/build-data.mjs "$CSV" "${{ steps.src.outputs.version }}" data/companies.tsv.gz
+          ls -lh data/companies.tsv.gz
+
+      - name: Sanity-check the artifact (loads, full size)
+        run: |
+          npm run build
+          npm test
+          COMPANIESWISE_DATA_FILE=data/companies.tsv.gz node -e "import('./dist/index.js').then(m=>{const i=m.datasetInfo();console.log('artifact:',JSON.stringify(i));if(i.kind!=='snapshot'||i.size<1000000){console.error('artifact sanity failed');process.exit(1);}})"
+
+      - name: Publish artifact to the "data" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view data >/dev/null 2>&1 || gh release create data \
+            --title "Companies House snapshot data" \
+            --notes "Rolling artifact consumed by 'companieswise-update'. Replaced monthly by CI. Source: Companies House Free Company Data Product (Open Government Licence v3.0)."
+          gh release upload data data/companies.tsv.gz --clobber
+          echo "Published companies.tsv.gz (version ${{ steps.src.outputs.version }}) to the 'data' release."
