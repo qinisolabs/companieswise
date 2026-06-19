@@ -143,12 +143,12 @@ export function lookupCompany(input: string): CompanyLookupResult {
     base.sic = rec.sic;
     if (info.kind === "sample") {
       base.note =
-        "Running on the ILLUSTRATIVE sample, not the real Companies House data — run `npx companieswise-update` (or let the monthly CI build) to load the real snapshot.";
+        "Running on the ILLUSTRATIVE sample, not the real Companies House data — run `npx -p companieswise companieswise-update` (or let the monthly CI build) to load the real snapshot.";
     }
   } else {
     base.note =
       info.kind === "sample"
-        ? "Well-formed number, but only the illustrative sample is loaded. Run `npx companieswise-update` to fetch the real Companies House snapshot."
+        ? "Well-formed number, but only the illustrative sample is loaded. Run `npx -p companieswise companieswise-update` to fetch the real Companies House snapshot."
         : "Well-formed number, but not in the loaded live-register snapshot. It may be a dissolved company (not in the free snapshot), a number not yet issued, or one registered/changed since the dataset date — check the live Companies House register for current status. Not guessing.";
   }
   return base;
@@ -162,6 +162,7 @@ export interface CompanySearchHit {
 export interface CompanySearchResult {
   query: string;
   count: number;
+  totalMatches: number;
   results: CompanySearchHit[];
   dataset: "sample" | "snapshot";
   datasetVersion: string;
@@ -173,22 +174,21 @@ export interface CompanySearchResult {
 export function searchCompany(query: string, limit = 20): CompanySearchResult {
   if (!Number.isFinite(limit) || limit <= 0) limit = 20;
   const info = datasetInfo();
-  const words = (query ?? "").toLowerCase().split(/\s+/).filter(Boolean);
-  const recs = searchRecords(words, limit);
-  const truncated = recs.length > limit;
-  const hits: CompanySearchHit[] = recs
-    .slice(0, limit)
-    .map((r) => ({ number: r.number, name: r.name, status: r.status }));
+  const q = (query ?? "").trim().toLowerCase();
+  const words = q.split(/\s+/).filter(Boolean);
+  const { hits: recs, total } = searchRecords(words, limit, q);
+  const hits: CompanySearchHit[] = recs.map((r) => ({ number: r.number, name: r.name, status: r.status }));
   return {
     query,
     count: hits.length,
+    totalMatches: total,
     results: hits,
     dataset: info.kind,
     datasetVersion: info.version,
-    truncated,
+    truncated: total > hits.length,
     note:
       info.kind === "sample"
-        ? "Searching the illustrative sample only — run `npx companieswise-update` for the real snapshot."
+        ? "Searching the illustrative sample only — run `npx -p companieswise companieswise-update` for the real snapshot."
         : undefined,
   };
 }

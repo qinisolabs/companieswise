@@ -63,14 +63,14 @@ gh release view data
 ```
 
 It downloads the current month's snapshot, builds `companies.tsv.gz`, and uploads it to the `data`
-release. After this, anyone can run `npx companieswise-update`. The workflow then re-runs
+release. After this, anyone can run `npx -p companieswise companieswise-update`. The workflow then re-runs
 automatically on the 10th of each month. (Use `gh workflow run "Refresh Companies House data" -f month=YYYY-MM`
 to backfill a specific month.)
 
 Sanity-check end to end:
 
 ```
-npx companieswise-update
+npx -p companieswise companieswise-update
 node -e "import('companieswise').then(m=>console.log(m.lookupCompany('00000006')))"
 ```
 

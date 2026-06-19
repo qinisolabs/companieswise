@@ -151,5 +151,24 @@ check("corrupt/empty snapshot falls back to the sample, never serves empty", () 
   resetDataset();
 });
 
+check("search ranks prefix/exact above incidental substring (+ totalMatches)", () => {
+  const f = join(tmpdir(), `cw-rank-${process.pid}.tsv`);
+  writeFileSync(
+    f,
+    "##VERSION=2026-06-01\n" +
+      "00000001\tATESCO CONSULTANCY LTD\tActive\tPrivate Limited Company\t2010-01-01\tEC1A 1BB\t62012 - x\n" +
+      "00000002\tTESCO STORES LIMITED\tActive\tPrivate Limited Company\t1947-01-01\tAL7 1GA\t47110 - x\n" +
+      "00000003\tTESCO PLC\tActive\tPublic Limited Company\t1947-11-27\tAL7 1GA\t47110 - x\n"
+  );
+  process.env.COMPANIESWISE_DATA_FILE = f;
+  resetDataset();
+  const r = searchCompany("tesco");
+  assert.equal(r.totalMatches, 3); // all three names contain "tesco"
+  assert.equal(r.results[0].name, "TESCO PLC"); // prefix + shortest ranks first
+  assert.equal(r.results[r.results.length - 1].name, "ATESCO CONSULTANCY LTD"); // substring ranks last
+  delete process.env.COMPANIESWISE_DATA_FILE;
+  resetDataset();
+});
+
 console.log(`\n${pass} passed, ${fail} failed`);
 if (fail > 0) process.exit(1);

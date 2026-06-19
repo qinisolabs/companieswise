@@ -45,7 +45,7 @@ export const TOOLS: ToolSpec[] = [
   },
 ];
 
-export const SERVER_INFO = { name: "companieswise", version: "0.1.1" } as const;
+export const SERVER_INFO = { name: "companieswise", version: "0.1.2" } as const;
 export const PUBLIC_BASE = "https://qinisolabs.github.io/companieswise";
 const DEFAULT_PROTOCOL = "2025-06-18";
 

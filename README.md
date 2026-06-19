@@ -31,7 +31,7 @@ Ask an LLM "what's the registered name and status of company `00445790`?" and it
 Then load the real data once (the package ships with only a small sample):
 
 ```bash
-npx companieswise-update
+npx -p companieswise companieswise-update
 ```
 
 This downloads the latest monthly Companies House snapshot (~tens of MB) to a local cache. Re-run it whenever you want to refresh; a GitHub Action rebuilds the snapshot monthly, so `companieswise-update` always fetches the current month. Until you run it, `validate_company_number` works fully and `lookup_company`/`search_company` clearly say they're on the sample.

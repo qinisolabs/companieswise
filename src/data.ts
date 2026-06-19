@@ -149,20 +149,62 @@ export function getRecord(number: string): CompanyRecord | undefined {
   return toRecord(rowAt(ds.buf, off));
 }
 
-/** Scan for companies whose name contains ALL the given lowercased words (up to limit+1). */
-export function searchRecords(words: string[], limit: number): CompanyRecord[] {
-  const ds = ensureLoaded();
-  const hits: CompanyRecord[] = [];
-  if (!words.length) return hits;
-  for (const off of ds.index.values()) {
-    const cells = rowAt(ds.buf, off);
-    const name = (cells[1] || "").toLowerCase();
-    if (words.every((w) => name.includes(w))) {
-      hits.push(toRecord(cells));
-      if (hits.length > limit) break;
-    }
+// Extract just the name (2nd field) without splitting the whole row — keeps the
+// full-dataset scan cheap (no 7-field split + record build per non-candidate row).
+function nameAt(buf: Buffer, off: number): string {
+  const t1 = buf.indexOf(TAB, off);
+  if (t1 === -1) return "";
+  let t2 = buf.indexOf(TAB, t1 + 1);
+  if (t2 === -1) {
+    const nl = buf.indexOf(NL, t1 + 1);
+    t2 = nl === -1 ? buf.length : nl;
   }
-  return hits;
+  return buf.toString("utf8", t1 + 1, t2);
+}
+
+// Relevance: exact name (4) > prefix at a word boundary (3) > whole-word match (2) > substring (1).
+function scoreName(nameLower: string, q: string): number {
+  if (!q) return 1;
+  if (nameLower === q) return 4;
+  if (nameLower.startsWith(q) && (nameLower.length === q.length || /[^a-z0-9]/.test(nameLower[q.length]))) return 3;
+  const i = nameLower.indexOf(q);
+  if (i >= 0) {
+    const before = i === 0 || /[^a-z0-9]/.test(nameLower[i - 1]);
+    const after = i + q.length === nameLower.length || /[^a-z0-9]/.test(nameLower[i + q.length]);
+    if (before && after) return 2;
+  }
+  return 1;
+}
+
+export interface SearchOutcome {
+  hits: CompanyRecord[];
+  total: number;
+}
+
+/**
+ * Find companies whose name contains ALL the given words, ranked by relevance
+ * (exact > prefix > whole-word > substring; then shorter name, then alphabetical).
+ * Returns the top `limit` and the total number of matches.
+ */
+export function searchRecords(words: string[], limit: number, q: string): SearchOutcome {
+  const ds = ensureLoaded();
+  if (!words.length) return { hits: [], total: 0 };
+  let total = 0;
+  type Cand = { score: number; len: number; nl: string; off: number };
+  const cmp = (a: Cand, b: Cand) => b.score - a.score || a.len - b.len || (a.nl < b.nl ? -1 : a.nl > b.nl ? 1 : 0);
+  const best: Cand[] = []; // kept sorted best-first, length <= limit
+  for (const off of ds.index.values()) {
+    const name = nameAt(ds.buf, off);
+    const nl = name.toLowerCase();
+    if (!words.every((w) => nl.includes(w))) continue;
+    total++;
+    const cand: Cand = { score: scoreName(nl, q), len: name.length, nl, off };
+    if (best.length >= limit && cmp(cand, best[best.length - 1]) >= 0) continue;
+    best.push(cand);
+    best.sort(cmp);
+    if (best.length > limit) best.pop();
+  }
+  return { hits: best.map((b) => toRecord(rowAt(ds.buf, b.off))), total };
 }
 
 export const DATA_URL_DEFAULT =

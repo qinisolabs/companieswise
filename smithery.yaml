@@ -1,6 +1,6 @@
 # Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
 # companieswise is a local stdio MCP server published to npm; Smithery launches it via npx.
-# After install, run `npx companieswise-update` once to download the real Companies House
+# After install, run `npx -p companieswise companieswise-update` once to download the real Companies House
 # snapshot (the package ships with only an illustrative sample).
 
 startCommand:

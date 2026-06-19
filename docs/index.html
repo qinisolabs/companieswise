@@ -77,7 +77,7 @@
   }
 }</pre>
     <p>Then load the real data once (the package ships with a small sample):</p>
-    <pre>npx companieswise-update</pre>
+    <pre>npx -p companieswise companieswise-update</pre>
     <p class="note">This caches the latest monthly Companies House snapshot locally — no API key, no rate limit, no per-request cost. A GitHub Action rebuilds the snapshot monthly, so re-running <code>companieswise-update</code> always fetches the current month. A hosted, always-current endpoint (Cloudflare D1 + the Companies House Streaming API) is a planned follow-on.</p>
   </section>
 

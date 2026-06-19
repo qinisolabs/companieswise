@@ -23,7 +23,7 @@ LLMs confidently invent company names, statuses and dates for a given company nu
 Companies House "Free Company Data Product" (~5.6M companies, UK-wide), Open Government Licence v3.0. Too large to bundle in npm, so the code ships on npm and the data is built monthly by CI into a GitHub Release artifact that `companieswise-update` downloads to a local cache. No API key, no rate limit, no per-request cost. Every response reports its datasetVersion (snapshot date). Contains public sector information from Companies House licensed under the OGL v3.0; © Crown copyright.
 
 ## Install
-- Local MCP: npx -y companieswise   (then run `npx companieswise-update` once for the real data)
+- Local MCP: npx -y companieswise   (then run `npx -p companieswise companieswise-update` once for the real data)
 - Library: npm install companieswise
 - A hosted, real-time endpoint (Cloudflare D1 + Companies House Streaming API) is a planned follow-on.
 
