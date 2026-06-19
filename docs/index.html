@@ -82,7 +82,20 @@
 }</pre>
     <p>Then load the real data once (the package ships with a small sample):</p>
     <pre>npx -p companieswise companieswise-update</pre>
-    <p class="note">This caches the latest monthly Companies House snapshot locally — no API key, no rate limit, no per-request cost. A GitHub Action rebuilds the snapshot monthly, so re-running <code>companieswise-update</code> always fetches the current month. A hosted, always-current endpoint (Cloudflare D1 + the Companies House Streaming API) is a planned follow-on.</p>
+    <p class="note">This caches the latest monthly Companies House snapshot locally — no API key, no rate limit, no per-request cost. A GitHub Action rebuilds the snapshot monthly, so re-running <code>companieswise-update</code> always fetches the current month.</p>
+
+    <h2 style="margin-top:30px">Want real-time data? Add a free key (optional)</h2>
+    <p>By default companieswise serves the monthly snapshot. If you set a free <a href="https://developer.company-information.service.gov.uk/">Companies House API key</a>, it switches to <strong>live</strong> queries instead — real-time register status, including dissolved companies — using your own key (so there's no shared rate limit). Add it to the server's environment:</p>
+    <pre>{
+  "mcpServers": {
+    "companieswise": {
+      "command": "npx",
+      "args": ["-y", "companieswise"],
+      "env": { "COMPANIESWISE_CH_API_KEY": "your-companies-house-api-key" }
+    }
+  }
+}</pre>
+    <p class="note">With a key set, results are tagged <code>"dataset": "live"</code>; without one, they stay on the snapshot (<code>"dataset": "snapshot"</code>) — so it's always clear which you're getting. Nothing is sent anywhere except directly to the official Companies House API with your key.</p>
   </section>
 
   <section>

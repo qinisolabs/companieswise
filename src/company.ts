@@ -93,7 +93,7 @@ export interface CompanyLookupResult {
   sic: string | null;
   coverage: "United Kingdom";
   basis: string;
-  dataset: "sample" | "snapshot";
+  dataset: "sample" | "snapshot" | "live";
   datasetVersion: string;
   attribution: string;
   note?: string;
@@ -164,7 +164,7 @@ export interface CompanySearchResult {
   count: number;
   totalMatches: number;
   results: CompanySearchHit[];
-  dataset: "sample" | "snapshot";
+  dataset: "sample" | "snapshot" | "live";
   datasetVersion: string;
   truncated: boolean;
   note?: string;

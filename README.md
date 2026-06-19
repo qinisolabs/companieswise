@@ -36,6 +36,24 @@ npx -p companieswise companieswise-update
 
 This downloads the latest monthly Companies House snapshot (~tens of MB) to a local cache. Re-run it whenever you want to refresh; a GitHub Action rebuilds the snapshot monthly, so `companieswise-update` always fetches the current month. Until you run it, `validate_company_number` works fully and `lookup_company`/`search_company` clearly say they're on the sample.
 
+## Optional: live mode (BYO key)
+
+By default companieswise serves the monthly **snapshot** (offline, no key). If you set a free [Companies House API key](https://developer.company-information.service.gov.uk/), it switches to **live** queries against the official Companies House API instead — real-time register status, including dissolved companies, on your own key (no shared rate limit):
+
+```json
+{
+  "mcpServers": {
+    "companieswise": {
+      "command": "npx",
+      "args": ["-y", "companieswise"],
+      "env": { "COMPANIESWISE_CH_API_KEY": "your-companies-house-api-key" }
+    }
+  }
+}
+```
+
+`lookup_company` and `search_company` use the live API when the key is set (results tagged `"dataset": "live"`) and fall back to the snapshot when it isn't (`"dataset": "snapshot"`), so it's always clear which you're getting. `validate_company_number` is offline either way. The key is sent only to the official Companies House API. `CH_API_KEY` is accepted as an alias.
+
 ## Use it as a library
 
 ```bash

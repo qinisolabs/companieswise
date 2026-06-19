@@ -20,7 +20,7 @@ for (const t of TOOLS) {
   for (const a of t.args) shape[a.name] = zodFor(a);
   server.tool(t.name, t.description, shape, async (args) => {
     try {
-      return json(t.run(args as Record<string, unknown>));
+      return json(await t.run(args as Record<string, unknown>));
     } catch (err) {
       return json({ error: (err as Error).message });
     }

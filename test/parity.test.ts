@@ -8,6 +8,7 @@ import {
   lookupCompany,
   searchCompany,
   datasetInfo,
+  chApiKey,
 } from "../src/index.js";
 import { resetDataset } from "../src/data.js";
 import { handleRpc } from "../src/core.js";
@@ -81,30 +82,62 @@ check("search narrows by multiple words", () => {
 });
 check("search respects limit", () => assert.equal(searchCompany("sample", 2).results.length, 2));
 
-/* ---------- JSON-RPC core (sample) ---------- */
-function rpc(method: string, params?: unknown, id: number | string = 1) {
-  return handleRpc({ jsonrpc: "2.0", id, method, params }) as any;
+/* ---------- JSON-RPC core (sample) + live-mode routing — handleRpc is async ---------- */
+async function rpc(method: string, params?: unknown, id: number | string = 1) {
+  return (await handleRpc({ jsonrpc: "2.0", id, method, params })) as any;
 }
-check("initialize returns companieswise serverInfo", () => {
-  const r = rpc("initialize", { protocolVersion: "2025-06-18" });
-  assert.equal(r.result.serverInfo.name, "companieswise");
-});
-check("tools/list returns the three tools", () => {
-  const r = rpc("tools/list");
-  const names = r.result.tools.map((t: any) => t.name).sort();
-  assert.deepEqual(names, ["lookup_company", "search_company", "validate_company_number"]);
-});
-check("tools/call lookup_company", () => {
-  const r = rpc("tools/call", { name: "lookup_company", arguments: { number: "99999001" } });
-  assert.equal(JSON.parse(r.result.content[0].text).name, "SAMPLE ALPHA TRADING LIMITED");
-});
-check("tools/call validate_company_number", () => {
-  const r = rpc("tools/call", { name: "validate_company_number", arguments: { number: "SC123456" } });
-  assert.equal(JSON.parse(r.result.content[0].text).prefix, "SC");
-});
-check("unknown tool → error", () => assert.ok(rpc("tools/call", { name: "nope", arguments: {} }).error));
-check("notifications/initialized → null", () =>
-  assert.equal(handleRpc({ jsonrpc: "2.0", method: "notifications/initialized" }), null));
+async function asyncChecks() {
+  {
+    const r = await rpc("initialize", { protocolVersion: "2025-06-18" });
+    check("initialize returns companieswise serverInfo", () =>
+      assert.equal(r.result.serverInfo.name, "companieswise"));
+    check("initialize reports SNAPSHOT mode when no key is set", () =>
+      assert.match(r.result.instructions, /SNAPSHOT mode/));
+  }
+  {
+    const r = await rpc("tools/list");
+    check("tools/list returns the three tools", () => {
+      const names = r.result.tools.map((t: any) => t.name).sort();
+      assert.deepEqual(names, ["lookup_company", "search_company", "validate_company_number"]);
+    });
+  }
+  {
+    const r = await rpc("tools/call", { name: "lookup_company", arguments: { number: "99999001" } });
+    check("tools/call lookup_company", () =>
+      assert.equal(JSON.parse(r.result.content[0].text).name, "SAMPLE ALPHA TRADING LIMITED"));
+  }
+  {
+    const r = await rpc("tools/call", { name: "validate_company_number", arguments: { number: "SC123456" } });
+    check("tools/call validate_company_number", () =>
+      assert.equal(JSON.parse(r.result.content[0].text).prefix, "SC"));
+  }
+  {
+    const r = await rpc("tools/call", { name: "nope", arguments: {} });
+    check("unknown tool → error", () => assert.ok(r.error));
+  }
+  {
+    const r = await handleRpc({ jsonrpc: "2.0", method: "notifications/initialized" });
+    check("notifications/initialized → null", () => assert.equal(r, null));
+  }
+  // BYO-key live mode — offline checks (key detection + init wording); no network calls.
+  check("chApiKey is undefined with no env var", () => {
+    delete process.env.COMPANIESWISE_CH_API_KEY;
+    delete process.env.CH_API_KEY;
+    assert.equal(chApiKey(), undefined);
+  });
+  check("chApiKey reads COMPANIESWISE_CH_API_KEY", () => {
+    process.env.COMPANIESWISE_CH_API_KEY = "k-123";
+    assert.equal(chApiKey(), "k-123");
+    delete process.env.COMPANIESWISE_CH_API_KEY;
+  });
+  {
+    process.env.COMPANIESWISE_CH_API_KEY = "k-123";
+    const r = await rpc("initialize", {});
+    check("initialize reports LIVE mode when a key is set", () =>
+      assert.match(r.result.instructions, /LIVE mode/));
+    delete process.env.COMPANIESWISE_CH_API_KEY;
+  }
+}
 
 /* ---------- snapshot-load path (the real-data mechanism, via a temp file) ---------- */
 check("loads a real snapshot from COMPANIESWISE_DATA_FILE", () => {
@@ -170,5 +203,7 @@ check("search ranks prefix/exact above incidental substring (+ totalMatches)", (
   resetDataset();
 });
 
-console.log(`\n${pass} passed, ${fail} failed`);
-if (fail > 0) process.exit(1);
+asyncChecks().then(() => {
+  console.log(`\n${pass} passed, ${fail} failed`);
+  if (fail > 0) process.exit(1);
+});

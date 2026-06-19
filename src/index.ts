@@ -10,3 +10,4 @@ export {
   type CompanySearchHit,
 } from "./company.js";
 export { downloadAndCache, resetDataset, cacheFile, DATA_URL_DEFAULT, type CompanyRecord } from "./data.js";
+export { chApiKey, lookupCompanyLive, searchCompanyLive } from "./chapi.js";

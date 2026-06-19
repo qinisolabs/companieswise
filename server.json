@@ -1,8 +1,8 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.qinisolabs/companieswise",
-  "description": "Verified UK company lookup & number validation for AI agents — Companies House data, not guesses.",
-  "version": "0.1.2",
+  "description": "Verified UK company lookup & validation for AI agents — Companies House data, snapshot or live.",
+  "version": "0.2.0",
   "repository": {
     "url": "https://github.com/qinisolabs/companieswise",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "npm",
       "identifier": "companieswise",
-      "version": "0.1.2",
+      "version": "0.2.0",
       "transport": { "type": "stdio" }
     }
   ]
