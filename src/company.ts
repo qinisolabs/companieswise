@@ -1,4 +1,5 @@
-import { getDataset, type CompanyRecord } from "./data.js";
+import { getRecord, searchRecords, datasetInfo } from "./data.js";
+export { datasetInfo } from "./data.js";
 
 // UK company numbers are 8 characters: either 8 digits (England & Wales) or a
 // 2-letter prefix + 6 digits. There is NO check digit, so validation is format +
@@ -104,7 +105,7 @@ export interface CompanyLookupResult {
  * official registered details, or an honest "not found" instead of guessing.
  */
 export function lookupCompany(input: string): CompanyLookupResult {
-  const ds = getDataset();
+  const info = datasetInfo();
   const number = normalizeNumber(input);
   const base: CompanyLookupResult = {
     input,
@@ -119,8 +120,8 @@ export function lookupCompany(input: string): CompanyLookupResult {
     sic: null,
     coverage: "United Kingdom",
     basis: BASIS,
-    dataset: ds.kind,
-    datasetVersion: ds.version,
+    dataset: info.kind,
+    datasetVersion: info.version,
     attribution: ATTRIBUTION,
     errors: [],
   };
@@ -131,7 +132,7 @@ export function lookupCompany(input: string): CompanyLookupResult {
   base.wellFormed = true;
   base.number = number;
 
-  const rec: CompanyRecord | undefined = ds.map.get(number);
+  const rec = getRecord(number);
   if (rec) {
     base.found = true;
     base.name = rec.name;
@@ -140,13 +141,13 @@ export function lookupCompany(input: string): CompanyLookupResult {
     base.incorporationDate = rec.incorporationDate;
     base.postcode = rec.postcode;
     base.sic = rec.sic;
-    if (ds.kind === "sample") {
+    if (info.kind === "sample") {
       base.note =
         "Running on the ILLUSTRATIVE sample, not the real Companies House data — run `npx companieswise-update` (or let the monthly CI build) to load the real snapshot.";
     }
   } else {
     base.note =
-      ds.kind === "sample"
+      info.kind === "sample"
         ? "Well-formed number, but only the illustrative sample is loaded. Run `npx companieswise-update` to fetch the real Companies House snapshot."
         : "Well-formed number, but not in the loaded live-register snapshot. It may be a dissolved company (not in the free snapshot), a number not yet issued, or one registered/changed since the dataset date — check the live Companies House register for current status. Not guessing.";
   }
@@ -171,34 +172,23 @@ export interface CompanySearchResult {
 /** Find companies whose name contains ALL of the query's words (case-insensitive). */
 export function searchCompany(query: string, limit = 20): CompanySearchResult {
   if (!Number.isFinite(limit) || limit <= 0) limit = 20;
-  const ds = getDataset();
+  const info = datasetInfo();
   const words = (query ?? "").toLowerCase().split(/\s+/).filter(Boolean);
-  const hits: CompanySearchHit[] = [];
-  if (words.length) {
-    for (const rec of ds.map.values()) {
-      const name = rec.name.toLowerCase();
-      if (words.every((w) => name.includes(w))) {
-        hits.push({ number: rec.number, name: rec.name, status: rec.status });
-        if (hits.length > limit) break;
-      }
-    }
-  }
-  const truncated = hits.length > limit;
+  const recs = searchRecords(words, limit);
+  const truncated = recs.length > limit;
+  const hits: CompanySearchHit[] = recs
+    .slice(0, limit)
+    .map((r) => ({ number: r.number, name: r.name, status: r.status }));
   return {
     query,
-    count: truncated ? limit : hits.length,
-    results: hits.slice(0, limit),
-    dataset: ds.kind,
-    datasetVersion: ds.version,
+    count: hits.length,
+    results: hits,
+    dataset: info.kind,
+    datasetVersion: info.version,
     truncated,
     note:
-      ds.kind === "sample"
+      info.kind === "sample"
         ? "Searching the illustrative sample only — run `npx companieswise-update` for the real snapshot."
         : undefined,
   };
-}
-
-export function datasetInfo() {
-  const ds = getDataset();
-  return { kind: ds.kind, version: ds.version, size: ds.map.size };
 }
