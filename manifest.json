@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "companieswise",
   "display_name": "companieswise — UK company lookup",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Verified UK company lookup & validation for AI agents — Companies House data, snapshot or live.",
   "long_description": "Look up UK companies by their Companies House number, validate a number's format, or find a company number by name — from official Companies House data, never a guess. By default it uses a bundled sample (or a locally-cached monthly snapshot); add a free Companies House API key below to switch to real-time live data, including dissolved companies. Your key is sent only to the official Companies House API.",
   "author": {

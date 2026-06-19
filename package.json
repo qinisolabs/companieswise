@@ -1,6 +1,6 @@
 {
   "name": "companieswise",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "mcpName": "io.github.qinisolabs/companieswise",
   "description": "Verified UK company lookup & validation for AI agents — Companies House data, snapshot or live.",
   "license": "Apache-2.0",

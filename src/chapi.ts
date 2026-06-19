@@ -9,6 +9,9 @@
 import { normalizeNumber, type CompanyLookupResult, type CompanySearchResult, type CompanySearchHit } from "./company.js";
 
 const API_BASE = "https://api.company-information.service.gov.uk";
+// Companies House's API gateway rejects requests with a default/programmatic User-Agent
+// (e.g. Node's "node"), so we send an explicit, identifiable one.
+const USER_AGENT = "companieswise (+https://github.com/qinisolabs/companieswise)";
 const ATTRIBUTION =
   "Contains public sector information from Companies House licensed under the Open Government Licence v3.0.";
 const LIVE_BASIS =
@@ -68,7 +71,9 @@ function typeLabel(t: string | undefined): string | null {
 async function chGet(path: string, key: string): Promise<{ status: number; body: any }> {
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, { headers: { Authorization: authHeader(key), Accept: "application/json" } });
+    res = await fetch(`${API_BASE}${path}`, {
+      headers: { Authorization: authHeader(key), Accept: "application/json", "User-Agent": USER_AGENT },
+    });
   } catch (e: any) {
     const err: any = new Error(`Could not reach the Companies House API: ${e?.message ?? e}`);
     err.code = -32603;
@@ -93,7 +98,8 @@ async function chGet(path: string, key: string): Promise<{ status: number; body:
     }
   }
   if (res.status >= 400 && res.status !== 404) {
-    const err: any = new Error(`Companies House API error ${res.status}.`);
+    const detail = body && (body.error || body.errors) ? ` — ${JSON.stringify(body.error ?? body.errors)}` : "";
+    const err: any = new Error(`Companies House API error ${res.status}${detail}.`);
     err.code = -32603;
     throw err;
   }
