@@ -7,7 +7,7 @@ The MCP Registry entry (via `mcp-publisher`) is canonical; Glama and mcp.so auto
 | MCP Registry (official) | `mcp-publisher publish` (PUBLISH.md §5) | ☐ |
 | Glama | Auto-ingest from the registry; claim via `glama.json` maintainer. Never add billing. | ☐ |
 | mcp.so | Auto-ingests from the registry. | ☐ |
-| awesome-mcp-servers | Manual PR — batch with other Qiniso tools (see Qinisolabs/AWESOME_MCP_PENDING.md). | ☐ |
+| awesome-mcp-servers | Manual PR #8352 (Search & Data Extraction). | ⏳ open, awaiting merge (2026-06-19) |
 | Smithery | `smithery.yaml` present; list as stdio/npx. | ☐ |
 
 ## Notes
