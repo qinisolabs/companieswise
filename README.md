@@ -96,6 +96,10 @@ No API key, no rate limit, no per-request cost — lookups run locally against t
 - **Not advice**, and not a statutory KYC/AML check.
 - **Not a guesser** — unknown numbers return an honest "not found".
 
+## Privacy
+
+This tool runs locally on your machine and is built not to collect, store, or transmit your data — no analytics, no telemetry, no account. By default it uses bundled/cached data offline; **only if you set a Companies House API key** does it send your lookup and key **directly to the official Companies House API** (never to Qiniso). Full policy: <https://qinisolabs.github.io/privacy.html>.
+
 ## License
 
 Apache-2.0. Company data © Crown copyright, Companies House, Open Government Licence v3.0; see `NOTICE`.

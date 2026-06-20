@@ -17,6 +17,7 @@
   "documentation": "https://qinisolabs.github.io/companieswise",
   "support": "https://github.com/qinisolabs/companieswise/issues",
   "license": "Apache-2.0",
+  "privacy_policies": ["https://qinisolabs.github.io/privacy.html"],
   "keywords": ["companies-house", "uk-company", "kyc", "due-diligence", "registry"],
   "server": {
     "type": "node",
